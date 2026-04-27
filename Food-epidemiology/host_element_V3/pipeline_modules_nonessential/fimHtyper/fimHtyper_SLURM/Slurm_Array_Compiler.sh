@@ -34,7 +34,7 @@ do
    tab_file=$main_output_folder_input/processing_files/${line}/results_tab.txt
    if [ ! -f "$tab_file" ]; 
    then
-      fimh_type="None_Found"
+      fimh_type="None_Found_fileempty"
    else
       fimh_type=$(grep "^FimH type:" "$tab_file" | awk '{print $3}')
       if [ -z "$fimh_type" ]; 
