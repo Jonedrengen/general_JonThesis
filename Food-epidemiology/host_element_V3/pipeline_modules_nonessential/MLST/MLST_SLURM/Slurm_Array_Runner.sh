@@ -3,6 +3,7 @@
 #SBATCH -p project
 #SBATCH -e Slurm_Array_Runner_%A_%a.err
 #SBATCH -o Slurm_Array_Runner_%A_%a.out
+#SBATCG --mem=12G
 
 
 #created by Jon Slotved (JOSS@dksund.dk)
