@@ -11,7 +11,7 @@ STARTTIMER="$(date +%s)"
 
 #config
 config_file_local="/dpssi/data/Projects/mtg_host_elements_files_and_output/proj/general_JonThesis/Food-epidemiology/host_element_V3/config/config.env"
-
+config_file=${CONFIG_FILE:-$config_file_local}
 #paths
 project_root=$(grep '^GLOBAL__PROJECT_ROOT__=' "$config_file" | awk -F'__=' '{print $2}')
 host_element_blcm_scripts="$project_root/pipeline_modules/host_element_blcm/SB27_excludeBeefnTurkey_18022026/blcm_testing"
