@@ -10,7 +10,7 @@ flowchart TD
 
     B --> F["K-modes Clustering\n(kmodes_SLURM_Submitter.sh)\ncgMLST-based cluster assignment"]
 
-    F --> G["BLCM / BLCA Model\n(run_hostelement_blca.sh)\nBayesian Latent Class Model\nHost attribution"]
+    F --> G["BLCM / BLCA Model\n(run_hostelement_blca.sh)\nHost attribution"]
     C --> G
     D --> G
 
