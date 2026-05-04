@@ -23,7 +23,7 @@ RUN conda install -c conda-forge -c bioconda mlst=2.33.1
 #working dir
 WORKDIR /src
 
-#copy runner and database from mlst clone containing schemes like ecoli_achtman_4 (for some reasong the dockerfile install does not)
+#copy runner and other code
 COPY . /src
 
 #make executable
