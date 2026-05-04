@@ -4,7 +4,7 @@ flowchart TD
     A["📂 Input\nGenome assemblies (.fasta)\n+ Host TSV file"]
 
     A --> B["cgMLSTFinder\n(cgmlstFinder_Submitter.sh)\nCore genome MLST typing"]
-    A --> C["Host Element Pipeline\n(host_element_pipeline_Submitter.sh)\nAMR / virulence gene detection"]
+    A --> C["Host Element Pipeline\n(host_element_pipeline_Submitter.sh)\n screening of MGEs in isolates"]
     A --> D["MLST Finder\n(Slurm_Array_Submitter.sh)\nSequence type assignment"]
     A --> E["FimH Typer\n(Slurm_Array_Submitter.sh)\nFimH adhesin typing"]
 
