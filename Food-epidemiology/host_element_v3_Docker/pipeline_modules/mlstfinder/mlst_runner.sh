@@ -105,8 +105,8 @@ run_mlstfinder() {
     sample_name="$2"
     project_root="$3"
     mlst "$sequence" \
-    --mincov $(( "$coverage" )) \
-    --minid $(( "$identity" )) \
+    --mincov $(( $coverage )) \
+    --minid $(( $identity )) \
     --scheme "$scheme" \
     --legacy \
     --label "$sample_name" \
