@@ -1,3 +1,4 @@
+
 @startuml pipeline_diagram_detailed
 
 skinparam DefaultFontSize 12
@@ -12,47 +13,49 @@ skinparam PartitionFontSize 13
 skinparam PartitionFontStyle bold
 skinparam NoteBorderColor #aaaaaa
 skinparam NoteBackgroundColor #fffde7
+skinparam TitleAlignment center
 
-title <size:16>Host Element Pipeline — Detailed Workflow</size>\n<size:11>host_element_V3 | Entry point: BLCM_analysis.sh</size>
+title <size:16>Host Element Attribution Pipeline - SSI Integration</size>\n<size:12>Entry Points: BLCM_analysis.sh or Individual Module Runs</size>
 
 start
 
-#4a90d9:<color:white>**Input**\nGenome assemblies (.fasta) + host_tsv\n<size:10>BLCM_analysis.sh</size></color>;
+#4a90d9:<color:white>**Input**\nGenome assemblies (.fasta) + host_tsv>
+#4a90d9:<color:white>**BLCM_analysis.sh**\nwraps all modules and runs>
 
-fork
+fork 
 
   partition "cgMLSTFinder" #dff0d8 {
-    #5ba85a:<color:white>cgmlstFinder_Submitter.sh\n<size:10>Submit SLURM array job</size></color>;
-    #5ba85a:<color:white>cgmlstFinder_Runner.sh\n<size:10>Per-sample: cgMLSTFinder → md5 conversion</size></color>;
-    #5ba85a:<color:white>cgmlstFinder_Compiler.sh\n<size:10>Merge per-sample results</size></color>;
+    #5ba85a:<color:white>cgmlstFinder_Submitter.sh\n<size:10>Submit SLURM array job </size>;
+    #5ba85a:<color:white>cgmlstFinder_Runner.sh\n<size:10>Per-sample: cgMLSTFinder → md5 conversion </size>;
+    #5ba85a:<color:white>cgmlstFinder_Compiler.sh\n<size:10>Merge per-sample results </size>;
   }
   note right
     Output:
     **kmodes_ready_inputfile.txt**
-    (sample ID + cgMLST md5 hashes)
+    (sample ID + 2500 loci cgMLST md5 hashes)
   end note
 
 fork again
 
-  partition "Host Element Pipeline" #dff0d8 {
-    #5ba85a:<color:white>host_element_pipeline_Submitter.sh\n<size:10>Prep input; trim scaffolds <500bp</size></color>;
-    #5ba85a:<color:white>mmseq2_Submitter.sh\n<size:10>Submit SLURM array: mmseq2 screening</size></color>;
-    #5ba85a:<color:white>mmseq2_Runner.sh\n<size:10>Per-sample: mmseq2 vs element gene DB</size></color>;
-    #5ba85a:<color:white>mmseq2_Compiler.sh\n<size:10>Merge mmseq2 results</size></color>;
-    #5ba85a:<color:white>host_element_pipeline_Element_Caller.sh\n<size:10>Call MGE presence/absence (0/1)</size></color>;
+  partition "MGE discovery" #dff0d8 {
+    #5ba85a:<color:white>host_element_pipeline_Submitter.sh\n<size:10>Prep input; trim scaffolds <500bp</size>;
+    #5ba85a:<color:white>mmseq2_Submitter.sh\n<size:10>Submit SLURM array: mmseq2 screening</size>;
+    #5ba85a:<color:white>mmseq2_Runner.sh\n<size:10>Per-sample: mmseq2 vs element gene DB</size>;
+    #5ba85a:<color:white>mmseq2_Compiler.sh\n<size:10>Merge mmseq2 results</size>;
+    #5ba85a:<color:white>host_element_pipeline_Element_Caller.sh\n<size:10>Call MGE presence/absence (0/1)</size>;
   }
   note right
     Output:
     **element_presence.tsv**
-    (sample × 18 elements binary matrix)
+    (sample × 17 MGEs binary matrix)
   end note
 
 fork again
 
   partition "MLST Finder" #dff0d8 {
-    #5ba85a:<color:white>Slurm_Array_Submitter.sh\n<size:10>Submit SLURM array job</size></color>;
-    #5ba85a:<color:white>Slurm_Array_Runner.sh\n<size:10>Per-sample: MLST sequence typing</size></color>;
-    #5ba85a:<color:white>Slurm_Array_Compiler.sh\n<size:10>Merge MLST results</size></color>;
+    #5ba85a:<color:white>Slurm_Array_Submitter.sh\n<size:10>Submit SLURM array job</size>;
+    #5ba85a:<color:white>Slurm_Array_Runner.sh\n<size:10>Per-sample: MLST sequence typing</size>;
+    #5ba85a:<color:white>Slurm_Array_Compiler.sh\n<size:10>Merge MLST results</size>;
   }
   note right
     Output:
@@ -63,9 +66,9 @@ fork again
 fork again
 
   partition "FimH Typer" #dff0d8 {
-    #5ba85a:<color:white>Slurm_Array_Submitter.sh\n<size:10>Submit SLURM array job</size></color>;
-    #5ba85a:<color:white>Slurm_Array_Runner.sh\n<size:10>Per-sample: FimH adhesin typing</size></color>;
-    #5ba85a:<color:white>Slurm_Array_Compiler.sh\n<size:10>Compile FimH results</size></color>;
+    #5ba85a:<color:white>Slurm_Array_Submitter.sh\n<size:10>Submit SLURM array job</size>;
+    #5ba85a:<color:white>Slurm_Array_Runner.sh\n<size:10>Per-sample: FimH adhesin typing</size>;
+    #5ba85a:<color:white>Slurm_Array_Compiler.sh\n<size:10>Compile FimH results</size>;
   }
   note right
     Output:
@@ -82,7 +85,7 @@ note right
   Compile waits on BLCM + FimH.
 end note
 
-#e8a838:<color:white>**K-modes Clustering**\nkmodes_SLURM_Submitter.sh\n<size:10>kmodes_clustering_predicting.py</size>\n<size:10>Assign cgMLST profiles to clusters (CL1/CL2)</size></color>;
+#e8a838:<color:white>**K-modes Clustering**\nkmodes_SLURM_Submitter.sh\n<size:10>Assign cgMLST profiles to clusters (CL1/CL2)</size>;
 note right
   Input: kmodes_ready_inputfile.txt
   Output:
@@ -90,7 +93,7 @@ note right
   (CL1/CL2 cluster assignment per sample)
 end note
 
-#c0392b:<color:white>**BLCM / BLCA Model**\nrun_hostelement_blca.sh\n<size:10>Bayesian latent class modeling (JAGS/R)</size>\n<size:10>Integrates: K-modes + HEP elements + MLST</size></color>;
+#c0392b:<color:white>**BLCM / BLCA Model**\nrun_hostelement_blca.sh\n<size:10>Bayesian latent class modeling (JAGS/R)</size>\n<size:10>Integrates: K-modes + HEP elements + MLST</size>;
 note right
   Inputs:
   - kmodes_predictions.csv
@@ -101,7 +104,7 @@ note right
   (posterior host probabilities per sample)
 end note
 
-#7d5ba6:<color:white>**Compile Final Output**\nrun_compile_blcm_output.sh\n<size:10>compile_blcm_output_csvfile.R</size>\n<size:10>Merge BLCM scores + FimH results</size></color>;
+#7d5ba6:<color:white>**Combine Final Output**\nrun_compile_blcm_output.sh\n<size:10>Merge BLCM scores + FimH results</size>;
 note right
   Inputs:
   - blcm_output_pred_scores.csv
