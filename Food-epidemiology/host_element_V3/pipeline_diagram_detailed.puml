@@ -1,0 +1,117 @@
+@startuml pipeline_diagram_detailed
+
+skinparam DefaultFontSize 12
+skinparam ActivityBackgroundColor #f0f0f0
+skinparam ActivityBorderColor #888888
+skinparam ActivityFontColor #000000
+skinparam ArrowColor #555555
+skinparam ArrowFontSize 10
+skinparam ArrowFontColor #333333
+skinparam PartitionBorderColor #aaaaaa
+skinparam PartitionFontSize 13
+skinparam PartitionFontStyle bold
+skinparam NoteBorderColor #aaaaaa
+skinparam NoteBackgroundColor #fffde7
+
+title <size:16>Host Element Pipeline — Detailed Workflow</size>\n<size:11>host_element_V3 | Entry point: BLCM_analysis.sh</size>
+
+start
+
+#4a90d9:<color:white>**Input**\nGenome assemblies (.fasta) + host_tsv\n<size:10>BLCM_analysis.sh</size></color>;
+
+fork
+
+  partition "cgMLSTFinder" #dff0d8 {
+    #5ba85a:<color:white>cgmlstFinder_Submitter.sh\n<size:10>Submit SLURM array job</size></color>;
+    #5ba85a:<color:white>cgmlstFinder_Runner.sh\n<size:10>Per-sample: cgMLSTFinder → md5 conversion</size></color>;
+    #5ba85a:<color:white>cgmlstFinder_Compiler.sh\n<size:10>Merge per-sample results</size></color>;
+  }
+  note right
+    Output:
+    **kmodes_ready_inputfile.txt**
+    (sample ID + cgMLST md5 hashes)
+  end note
+
+fork again
+
+  partition "Host Element Pipeline" #dff0d8 {
+    #5ba85a:<color:white>host_element_pipeline_Submitter.sh\n<size:10>Prep input; trim scaffolds <500bp</size></color>;
+    #5ba85a:<color:white>mmseq2_Submitter.sh\n<size:10>Submit SLURM array: mmseq2 screening</size></color>;
+    #5ba85a:<color:white>mmseq2_Runner.sh\n<size:10>Per-sample: mmseq2 vs element gene DB</size></color>;
+    #5ba85a:<color:white>mmseq2_Compiler.sh\n<size:10>Merge mmseq2 results</size></color>;
+    #5ba85a:<color:white>host_element_pipeline_Element_Caller.sh\n<size:10>Call MGE presence/absence (0/1)</size></color>;
+  }
+  note right
+    Output:
+    **element_presence.tsv**
+    (sample × 18 elements binary matrix)
+  end note
+
+fork again
+
+  partition "MLST Finder" #dff0d8 {
+    #5ba85a:<color:white>Slurm_Array_Submitter.sh\n<size:10>Submit SLURM array job</size></color>;
+    #5ba85a:<color:white>Slurm_Array_Runner.sh\n<size:10>Per-sample: MLST sequence typing</size></color>;
+    #5ba85a:<color:white>Slurm_Array_Compiler.sh\n<size:10>Merge MLST results</size></color>;
+  }
+  note right
+    Output:
+    **results_compiled.txt**
+    (sequence type per sample)
+  end note
+
+fork again
+
+  partition "FimH Typer" #dff0d8 {
+    #5ba85a:<color:white>Slurm_Array_Submitter.sh\n<size:10>Submit SLURM array job</size></color>;
+    #5ba85a:<color:white>Slurm_Array_Runner.sh\n<size:10>Per-sample: FimH adhesin typing</size></color>;
+    #5ba85a:<color:white>Slurm_Array_Compiler.sh\n<size:10>Compile FimH results</size></color>;
+  }
+  note right
+    Output:
+    **results_compiled.txt**
+    (FimH type per sample)
+  end note
+
+end fork
+
+note right
+  All four modules run in parallel (SLURM).
+  K-modes waits on cgMLSTFinder.
+  BLCM waits on K-modes + HEP + MLST.
+  Compile waits on BLCM + FimH.
+end note
+
+#e8a838:<color:white>**K-modes Clustering**\nkmodes_SLURM_Submitter.sh\n<size:10>kmodes_clustering_predicting.py</size>\n<size:10>Assign cgMLST profiles to clusters (CL1/CL2)</size></color>;
+note right
+  Input: kmodes_ready_inputfile.txt
+  Output:
+  **kmodes_predictions.csv**
+  (CL1/CL2 cluster assignment per sample)
+end note
+
+#c0392b:<color:white>**BLCM / BLCA Model**\nrun_hostelement_blca.sh\n<size:10>Bayesian latent class modeling (JAGS/R)</size>\n<size:10>Integrates: K-modes + HEP elements + MLST</size></color>;
+note right
+  Inputs:
+  - kmodes_predictions.csv
+  - element_presence.tsv
+  - results_compiled.txt (MLST)
+  Output:
+  **blcm_output_pred_scores.csv**
+  (posterior host probabilities per sample)
+end note
+
+#7d5ba6:<color:white>**Compile Final Output**\nrun_compile_blcm_output.sh\n<size:10>compile_blcm_output_csvfile.R</size>\n<size:10>Merge BLCM scores + FimH results</size></color>;
+note right
+  Inputs:
+  - blcm_output_pred_scores.csv
+  - results_compiled.txt (FimH)
+  Output:
+  **blcm_analysis.csv**
+  (MLST, FimH, cluster, host
+   probabilities, FZEC flag)
+end note
+
+stop
+
+@enduml
