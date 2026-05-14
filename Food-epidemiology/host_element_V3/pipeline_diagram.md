@@ -1,7 +1,9 @@
 
+## Overview
+
 ```mermaid
 flowchart TD
-    A["📂 Input\nGenome assemblies (.fasta)\n+ Host TSV file"]
+    A["📂 Input\nGenome assemblies (.fasta)\n+ Host TSV file\n-> Wrapper.sh"]
 
     A --> B["cgMLSTFinder\n(cgmlstFinder_Submitter.sh)\nCore genome MLST typing"]
     A --> C["Host Element Pipeline\n(host_element_pipeline_Submitter.sh)\n screening of MGEs in isolates"]
@@ -26,3 +28,4 @@ flowchart TD
     style G fill:#c0392b,color:#fff,stroke:#7b1f14
     style H fill:#7d5ba6,color:#fff,stroke:#4e3268
 ```
+
