@@ -37,10 +37,7 @@ conda activate "$conda_env"
 project_root=$(grep '^GLOBAL__PROJECT_ROOT__=' "$config_file" | awk -F'__=' '{print $2}' | xargs)
 mmseq2_python_scripts="$project_root/pipeline_modules/host_element_pipeline/mmseq2/scripts/python_scripts"
 
-
-
 threads=20
-
 
 # Set Search Type
 if [[ "$SearchType_input" == "prot" ]]; then

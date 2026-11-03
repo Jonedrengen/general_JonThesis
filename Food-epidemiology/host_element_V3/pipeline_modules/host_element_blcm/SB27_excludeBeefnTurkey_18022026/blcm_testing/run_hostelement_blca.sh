@@ -29,7 +29,7 @@ conda activate "$conda_env_blcm"
 CSV_Input=$1
 Folder_Output=$2
 
-Rscript $host_element_blcm_scripts/testing_blca_model.R -i $CSV_Input -o $Folder_Output
+Rscript "$host_element_blcm_scripts/testing_blca_model.R" -i "$CSV_Input" -o "$Folder_Output"
 
 
 # Script Timer

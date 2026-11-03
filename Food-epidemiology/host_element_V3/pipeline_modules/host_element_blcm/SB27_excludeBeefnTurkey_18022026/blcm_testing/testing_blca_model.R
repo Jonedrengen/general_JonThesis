@@ -49,7 +49,7 @@ suppressPackageStartupMessages(library(label.switching))
 
 rm(list=ls())
 
-## command line options
+## command line parsing
 opt_lst <- list(
   make_option(c("-i","--input_file"),
               help = "Input file name"),
@@ -62,14 +62,15 @@ arguments <- parse_args(parser,
                         positional_arguments = TRUE)
 opts <- arguments$options
 
+#create out dir
 dir.create(opts$o, recursive = TRUE, showWarnings = FALSE)
 
 
-# read in data:
-
+# read in data
 dat <- read.csv(opts$i)
 head(dat)
 
+# Labeling: Here we give numbers to each class, so the computer can do math :D 
 class_label <- rep(NA,nrow(dat))
 for (i in 1:nrow(dat)){
     if (dat$training[i] ==1){
@@ -79,7 +80,9 @@ for (i in 1:nrow(dat)){
         if (!is.na(dat$Chicken_CL2[i]) && dat$Chicken_CL2[i] ==1) class_label[i]=4
         if (!is.na(dat$Pork[i]) && dat$Pork[i] ==1) class_label[i]=5}
 }
+
 # set.seed(123)
+#saving test sample indexes in test_id var (test=(training==0))
 ntrain = nrow(dat)
 test_id <- which(dat[1:ntrain,]$training==0)
 
